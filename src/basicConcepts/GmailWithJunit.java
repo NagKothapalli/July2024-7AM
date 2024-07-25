@@ -4,6 +4,25 @@ import org.junit.Test;
 
 public class GmailWithJunit 
 {
+    //**********************************Test Suites*************************************
+	//Smoke Testing  , Regression Testing
+	@Test
+	public void smokeSuite()  //BVT : Build Validation Test
+	{
+		System.out.println("Test Suite : SMOKE");
+		composeAnEmail();
+		replyToEmail();
+	}
+	@Test
+	public void regressionSuite()
+	{
+		System.out.println("Test Suite : REGRESSION");
+		composeAnEmail();
+		replyToEmail();
+		forwardAnEmail();
+		deleteEmail();
+	}
+	//*****************************Test Cases***********************************************
 	@Test   // Java Method must be public , non static , no return type , no arguments
 	public void composeAnEmail()   // Test Case : Test Steps : 1 - 1.1 1.2  2 
 	{
@@ -58,7 +77,7 @@ public class GmailWithJunit
 		closeApplication();
 	}
 	
-	//******************************************************************
+	//***********************Reusable Components*******************************************
 	
 	
 	private void launchApplication()   // within the call

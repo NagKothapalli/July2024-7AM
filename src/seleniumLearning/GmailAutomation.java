@@ -112,6 +112,9 @@ public class GmailAutomation
 			//tagName[@attribute = 'value' ]
 			//tagName[text() = 'value' ]
 	
+	//tagName[@attribute1 = 'value' and @attribute2 = 'value']
+	//tagName[text() = 'value' and @attribute2 = 'value' ]
+	
 	@Test
 	public void forgotEmail()
 	{

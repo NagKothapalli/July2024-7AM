@@ -1,14 +1,21 @@
 package seleniumLearning;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.Duration;
+import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class ApsrtcAutomation
 {
@@ -35,36 +42,165 @@ public class ApsrtcAutomation
 	
 
 	@Before
-	public void launchApsrtcAppliction()
+	public void launchApsrtcAppliction() throws IOException
 	{
 		System.out.println("RC : Launch Apsrtc Application");		
-		driver.get("https://www.apsrtconline.in/");
+		//driver.get("https://www.apsrtconline.in/"); //Hard coded value
+		String myurl = readInput("URL");
+		driver.get(myurl); //parameterization , passing the data dynamically by reading it from a data source
 	}
 	
 	//input[@size='22' and @name='source']
 	
 	//select empSal from Employee  where EmpID=22
 	@Test
-	public void bookBusTicket()
+	public void bookBusTicket() throws InterruptedException
 	{
+		//Thread.sleep(30000);  //fixed wait / static wait / blind wait
+		//driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+		//Explicit wait
+		WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(30));
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@name='source']"))).click();
+		//WebElement sourceObj = driver.findElement(By.xpath("//input[@name='source']"));
+		//wait.until(ExpectedConditions.elementToBeClickable(sourceObj)).click();
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@name='source']"))).sendKeys("HYDERABAD");
 		System.out.println("Test Case : Book Bus Ticket");
 		driver.findElement(By.xpath("//input[@name='source']")).sendKeys("HYDERABAD");    //  //input[@size='22' and @name='source'] 
 		Actions actions = new Actions(driver);
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-		
+		//Thread.sleep(30000);
 		driver.findElement(By.xpath("//input[@name='searchBtn']")).click();
 		
 		driver.switchTo().alert().accept();
-		
+		//Thread.sleep(30000);
 		driver.findElement(By.xpath("//input[@name='destination']")).sendKeys("GUNTUR");    //  //input[@size='22' and @name='source'] 
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-		
+		//Thread.sleep(30000);
 		//select date of journey
 		driver.findElement(By.xpath("//input[@name='txtJourneyDate']")).click();
 		driver.findElement(By.xpath("//a[text()='16']")).click();
-		
+		//Thread.sleep(30000);
 		driver.findElement(By.xpath("//input[@name='searchBtn']")).click();
 	}
+	
+	//Method Overloading 
+	public WebElement giveWebElement(String myxpath)
+	{
+		WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(30));
+		WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(myxpath)));
+		return element;
+	}
+	
+	public WebElement giveWebElement(WebDriver driver, String myxpath)
+	{
+		WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(30));
+		WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(myxpath)));
+		return element;
+	}
+	
+	//Functional testing / Functionality testing
+	@Test
+	public void bookBusTicket_new() throws InterruptedException, IOException
+	{
+		System.out.println("Test Case : Book Bus Ticket"); 
+		giveWebElement("//input[@name='source']").sendKeys(readInput("FromCity"));
+		Actions actions = new Actions(driver);
+		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+		giveWebElement("//input[@name='searchBtn']").click();
+		driver.switchTo().alert().accept(); 
+		giveWebElement("//input[@name='destination']").sendKeys(readInput("ToCity"));
+		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+		giveWebElement("//input[@name='txtJourneyDate']").click();
+		giveWebElement("//a[text()='16']").click();
+		giveWebElement("//input[@name='searchBtn']").click();
+	}
+	
+	//Performance Testing
+	//Data Driven Testing : Executing the same test case with multiple sets of test data to check the stability of the application
+	@Test
+	public void bookBusTicket_dataDriven() throws InterruptedException, IOException
+	{
+		String fcities = readInput("FromCities");
+		String[] fcs = fcities.split(",");  // fcs contains 8 values
+		
+		String tcities = readInput("ToCities");
+		String[] tcs = tcities.split(",");
+		
+		String jdates = readInput("JDates");
+		String[] jds = jdates.split(",");   // jds[i]
+		
+		int count = fcs.length;
+		
+		for(int i=0;i<count;i++)
+		{
+			System.out.println("Iteration Count :" + (i+1));
+			System.out.println("Test Case : Book Bus Ticket"); 
+			giveWebElement("//input[@name='source']").sendKeys(fcs[i]); // i= 0 first from city name will be passed here
+			Actions actions = new Actions(driver);
+			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+			giveWebElement("//input[@name='searchBtn']").click();
+			driver.switchTo().alert().accept(); 
+			giveWebElement("//input[@name='destination']").sendKeys(tcs[i]);  // i=0 fiest to city name will be passed here 
+			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+			giveWebElement("//input[@name='txtJourneyDate']").click();
+			giveWebElement("//a[text()='"+jds[i]+"']").click();   // a[text()='18']  - Dynamic xpath
+			giveWebElement("//input[@name='searchBtn']").click();  // "Hare" + god + "Hare" + god = Hare Rama Hare Rama
+			Thread.sleep(2000);
+			giveWebElement("//a[@title='Home']").click();
+		}
+		
+	}
+	
+	
+	//object repository - have all the xpaths separately
+	
+	public String srcCity = "//input[@name='source']";
+	public String dstCity = "//input[@name='destination']";
+	public String searchBtn = "//input[@name='searchBtn']";
+	public String openCalenderBtn = "//input[@name='txtJourneyDate']";
+	public String jDate = "//a[text()='16']";
+	
+	@Test
+	public void bookBusTicket_new2() throws InterruptedException
+	{
+		System.out.println("Test Case : Book Bus Ticket"); 
+		giveWebElement(srcCity).sendKeys("HYDERABAD"); //Hyderabad is hard coded value
+		Actions actions = new Actions(driver);
+		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+		giveWebElement(searchBtn).click();
+		driver.switchTo().alert().accept(); 
+		giveWebElement(dstCity).sendKeys("GUNTUR");
+		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+		giveWebElement(openCalenderBtn).click();
+		giveWebElement(jDate).click();
+		giveWebElement(searchBtn).click();
+	}
+	
+	//Test Data should not be hard coded , we have to read it from a data source
+	
+	//Test Data : Few examples : URL - dev , qa , stage , prod server
+	   // userName , passWord , FromCity , ToCity , PassengerName , Mobile , Address , Age 
+	@Test
+	public void readTestData() throws IOException
+	{
+		FileInputStream file = new FileInputStream("TestData\\DevData.properties"); // like a news paper
+		Properties prop = new Properties(); //  news reader , 
+		prop.load(file);  // give the news paper to the reader
+		String a = prop.getProperty("URL");
+		String b = prop.getProperty("FromCity");
+		String c = prop.getProperty("ToCity");
+		System.out.println(a  +   b    +  c );
+	}
+	
+	public String readInput(String property) throws IOException
+	{
+		FileInputStream file = new FileInputStream("TestData\\DevData.properties"); // like a news paper
+		Properties prop = new Properties(); //  news reader , 
+		prop.load(file);  // give the news paper to the reader
+		String value = prop.getProperty(property);
+		return value;
+	}
+	
 	
 	@Test
 	public void allMethodsInWebElement()

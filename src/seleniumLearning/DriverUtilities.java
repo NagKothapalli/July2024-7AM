@@ -1,0 +1,39 @@
+package seleniumLearning;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class DriverUtilities
+{
+	    WebDriver driver; // null
+	    
+	    public DriverUtilities() //default constructor
+	    {
+	    	
+	    }
+	    
+	    public DriverUtilities(WebDriver mydriver)
+	    {
+	    	driver = mydriver; //12345
+	    }
+	
+		public WebElement giveWebElement(String myxpath)
+		{
+			WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(30));  //12345
+			WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(myxpath)));
+			return element;
+		}
+		
+		public WebElement giveWebElement(WebDriver driver, String myxpath)
+		{
+			WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(30));
+			WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(myxpath)));
+			return element;
+		}
+
+}

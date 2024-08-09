@@ -4,7 +4,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Properties;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,11 +23,14 @@ public class ApsrtcAutomation
 {
 	ChromeDriver driver; //null
 	String name; // null
-	
+	ReadProperties properties; //null
+	DriverUtilities driverUtilities; //null
 	public ApsrtcAutomation() throws InterruptedException
 	{
 		driver = new ChromeDriver(); // 12345
 		driver.manage().window().maximize();
+		properties = new ReadProperties();
+		driverUtilities = new DriverUtilities(driver); //12345
 		Thread.sleep(2000);
 		//driver.manage().window().minimize();
 		//Thread.sleep(2000);
@@ -46,7 +51,8 @@ public class ApsrtcAutomation
 	{
 		System.out.println("RC : Launch Apsrtc Application");		
 		//driver.get("https://www.apsrtconline.in/"); //Hard coded value
-		String myurl = readInput("URL");
+		//properties.readInput("URL");
+		String myurl = properties.readInput("URL");
 		driver.get(myurl); //parameterization , passing the data dynamically by reading it from a data source
 	}
 	
@@ -83,36 +89,23 @@ public class ApsrtcAutomation
 		driver.findElement(By.xpath("//input[@name='searchBtn']")).click();
 	}
 	
-	//Method Overloading 
-	public WebElement giveWebElement(String myxpath)
-	{
-		WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(30));
-		WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(myxpath)));
-		return element;
-	}
 	
-	public WebElement giveWebElement(WebDriver driver, String myxpath)
-	{
-		WebDriverWait wait = new WebDriverWait(driver,Duration.ofSeconds(30));
-		WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(myxpath)));
-		return element;
-	}
 	
 	//Functional testing / Functionality testing
 	@Test
 	public void bookBusTicket_new() throws InterruptedException, IOException
 	{
 		System.out.println("Test Case : Book Bus Ticket"); 
-		giveWebElement("//input[@name='source']").sendKeys(readInput("FromCity"));
+		driverUtilities.giveWebElement("//input[@name='source']").sendKeys(properties.readInput("FromCity"));
 		Actions actions = new Actions(driver);
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-		giveWebElement("//input[@name='searchBtn']").click();
+		driverUtilities.giveWebElement("//input[@name='searchBtn']").click();
 		driver.switchTo().alert().accept(); 
-		giveWebElement("//input[@name='destination']").sendKeys(readInput("ToCity"));
+		driverUtilities.giveWebElement("//input[@name='destination']").sendKeys(properties.readInput("ToCity"));
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-		giveWebElement("//input[@name='txtJourneyDate']").click();
-		giveWebElement("//a[text()='16']").click();
-		giveWebElement("//input[@name='searchBtn']").click();
+		driverUtilities.giveWebElement("//input[@name='txtJourneyDate']").click();
+		driverUtilities.giveWebElement("//a[text()='16']").click();
+		driverUtilities.giveWebElement("//input[@name='searchBtn']").click();
 	}
 	
 	//Performance Testing
@@ -120,13 +113,13 @@ public class ApsrtcAutomation
 	@Test
 	public void bookBusTicket_dataDriven() throws InterruptedException, IOException
 	{
-		String fcities = readInput("FromCities");
+		String fcities = properties.readInput("FromCities");
 		String[] fcs = fcities.split(",");  // fcs contains 8 values
 		
-		String tcities = readInput("ToCities");
+		String tcities = properties.readInput("ToCities");
 		String[] tcs = tcities.split(",");
 		
-		String jdates = readInput("JDates");
+		String jdates = properties.readInput("JDates");
 		String[] jds = jdates.split(",");   // jds[i]
 		
 		int count = fcs.length;
@@ -135,18 +128,18 @@ public class ApsrtcAutomation
 		{
 			System.out.println("Iteration Count :" + (i+1));
 			System.out.println("Test Case : Book Bus Ticket"); 
-			giveWebElement("//input[@name='source']").sendKeys(fcs[i]); // i= 0 first from city name will be passed here
+			driverUtilities.giveWebElement("//input[@name='source']").sendKeys(fcs[i]); // i= 0 first from city name will be passed here
 			Actions actions = new Actions(driver);
 			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-			giveWebElement("//input[@name='searchBtn']").click();
+			driverUtilities.giveWebElement("//input[@name='searchBtn']").click();
 			driver.switchTo().alert().accept(); 
-			giveWebElement("//input[@name='destination']").sendKeys(tcs[i]);  // i=0 fiest to city name will be passed here 
+			driverUtilities.giveWebElement("//input[@name='destination']").sendKeys(tcs[i]);  // i=0 fiest to city name will be passed here 
 			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-			giveWebElement("//input[@name='txtJourneyDate']").click();
-			giveWebElement("//a[text()='"+jds[i]+"']").click();   // a[text()='18']  - Dynamic xpath
-			giveWebElement("//input[@name='searchBtn']").click();  // "Hare" + god + "Hare" + god = Hare Rama Hare Rama
+			driverUtilities.giveWebElement("//input[@name='txtJourneyDate']").click();
+			driverUtilities.giveWebElement("//a[text()='"+jds[i]+"']").click();   // a[text()='18']  - Dynamic xpath
+			driverUtilities.giveWebElement("//input[@name='searchBtn']").click();  // "Hare" + god + "Hare" + god = Hare Rama Hare Rama
 			Thread.sleep(2000);
-			giveWebElement("//a[@title='Home']").click();
+			driverUtilities.giveWebElement("//a[@title='Home']").click();
 		}
 		
 	}
@@ -164,16 +157,16 @@ public class ApsrtcAutomation
 	public void bookBusTicket_new2() throws InterruptedException
 	{
 		System.out.println("Test Case : Book Bus Ticket"); 
-		giveWebElement(srcCity).sendKeys("HYDERABAD"); //Hyderabad is hard coded value
+		driverUtilities.giveWebElement(srcCity).sendKeys("HYDERABAD"); //Hyderabad is hard coded value
 		Actions actions = new Actions(driver);
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-		giveWebElement(searchBtn).click();
+		driverUtilities.giveWebElement(searchBtn).click();
 		driver.switchTo().alert().accept(); 
-		giveWebElement(dstCity).sendKeys("GUNTUR");
+		driverUtilities.giveWebElement(dstCity).sendKeys("GUNTUR");
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-		giveWebElement(openCalenderBtn).click();
-		giveWebElement(jDate).click();
-		giveWebElement(searchBtn).click();
+		driverUtilities.giveWebElement(openCalenderBtn).click();
+		driverUtilities.giveWebElement(jDate).click();
+		driverUtilities.giveWebElement(searchBtn).click();
 	}
 	
 	//Test Data should not be hard coded , we have to read it from a data source
@@ -192,14 +185,7 @@ public class ApsrtcAutomation
 		System.out.println(a  +   b    +  c );
 	}
 	
-	public String readInput(String property) throws IOException
-	{
-		FileInputStream file = new FileInputStream("TestData\\DevData.properties"); // like a news paper
-		Properties prop = new Properties(); //  news reader , 
-		prop.load(file);  // give the news paper to the reader
-		String value = prop.getProperty(property);
-		return value;
-	}
+	
 	
 	
 	@Test
@@ -239,10 +225,52 @@ public class ApsrtcAutomation
 		actions.moveToElement(fromCity).click().sendKeys("HYDERABAD").pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).doubleClick().contextClick().build().perform();
 	}
 	
+	@Test
+	public void handleMultipleWindows() throws InterruptedException
+	{
+		driverUtilities.giveWebElement("//a[@title='TimeTable / Track']").click();
+		driverUtilities.giveWebElement(driver,"//a[text()='All services Time Table & Tracking']").click();
+		Set<String> windows = driver.getWindowHandles(); // windows : contains session ids of all the windows opened in the current execution
+		//ArrayList<String> mylist = new ArrayList<String>(); // mylist : an empty list object
+		//As we can not get the values directly from a SET , we have to convert SET to LIST .
+		ArrayList<String> mylist = new ArrayList<String>(windows); // pass the SET object as an input to the constructor of LIST class
+		int count = mylist.size();
+		for(int i=0;i<count;i++)
+		{
+			System.out.println(mylist.get(i));  // i =0 1 .....
+		}
+		
+		System.out.println("Title of window before :"+ driver.getTitle());
+		
+		driver.switchTo().window(mylist.get(1));
+		
+		Thread.sleep(4000);
+		
+		System.out.println("Title of window after switching :"+ driver.getTitle());
+		
+		//we can close the second window
+		
+		driver.close(); // this function will close the current active window
+		
+		//driver.quit(); // this function will kill the driver object , all windows opened in the current execution will be closed
+		
+		//org.openqa.selenium.NoSuchSessionException: Session ID is null. Using WebDriver after calling quit()?
+		
+		Thread.sleep(4000);
+		
+		driver.switchTo().window(mylist.get(0));
+		
+		Thread.sleep(4000);
+		
+		driverUtilities.giveWebElement(driver,"//a[@title='Home']").click();
+		
+		driver.quit();
+		
+	}
 	
 	
 	
-	
+
 	
 	
 	

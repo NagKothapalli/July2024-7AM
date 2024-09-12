@@ -25,5 +25,14 @@ public class ReadProperties
 		String value = prop.getProperty(property);
 		return value;
 	}
+	
+	public String readInput2(String filepath,String property) throws IOException
+	{
+		FileInputStream file = new FileInputStream(filepath); // like a news paper
+		Properties prop = new Properties(); //  news reader , 
+		prop.load(file);  // give the news paper to the reader
+		String value = prop.getProperty(property);
+		return value;
+	}
 
 }
